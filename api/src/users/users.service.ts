@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { SESSenderService } from 'src/mail-sender/ses-sender.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
@@ -10,6 +11,9 @@ const users = [
 
 @Injectable()
 export class UsersService {
+    constructor(
+        private readonly sESSenderService: SESSenderService,
+    ) {}
     public async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
         const check = users.find((u) => u.email === createUserDto.email);
         if (check) {
@@ -17,6 +21,8 @@ export class UsersService {
         }
         const newUser = { ...createUserDto, id: crypto.randomBytes(16).toString("hex") };
         users.push(newUser);
+
+        // await this.sESSenderService.sendMail(createUserDto.email, 'CreateUserTemplate', { firstName: createUserDto.firstName });
         return newUser;
     }
 
